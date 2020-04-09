@@ -1,0 +1,119 @@
+<html>
+
+<head>
+	<title>Fast-Link - Download file free</title>
+	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+	<link rel="icon" href="favicon.ico" type="image/x-icon">
+	<link rel="stylesheet" href="asset/css/bootstrap.min.css">
+	<script src="asset/js/jquery.min.js"></script>
+	<style type="text/css">
+		body {
+			background: #f4f7fa;
+		}
+
+		.container {
+			padding-top: 80px;
+		}
+
+		.form-group-result {
+			padding-top: 20px;
+		}
+
+		#result_text {
+			padding-bottom: 12px;
+		}
+	</style>
+</head>
+
+<body>
+
+
+	<div class="container">
+		<div class="row">
+			<div class="col">
+			</div>
+			<div class="col-8">
+				<form id="getlink_form">
+					<div class="form-group">
+						<input type="text" class="form-control" id="link"
+							placeholder="Your link: Rapidgator, K2C, Uploaded.to" />
+					</div>
+					<button type="submit" class="btn btn-primary" id="submit_button">GetLink</button>
+					<div class="form-group form-group-result">
+						<input type="text" class="form-control" id="result_text" disabled="disabled" placeholder="Result: ..."/>
+						<a id="result" target="_blank"></a>
+					</div>
+				</form>
+			</div>
+			<div class="col">
+				<img src="asset/images/momo.jpg" alt="MOMO QRCODE" height="240px" width="200px">
+			</div>
+		</div>
+	</div>
+
+</body>
+
+<script>
+	console.log("Hello")
+
+	$("#getlink_form").submit(function (event) {
+		event.preventDefault();
+
+		const link = $("#link").val();
+
+		if (link === "") {
+			$("#result_text").val("Link không hợp lệ.");
+			return;
+		}
+
+		$("#result").removeAttr("href");
+		$("#result_text").val("");
+		$("#result").html("");
+
+		const data = {
+			"link": link
+		}
+
+		$.ajax({
+			url: 'https://esc00.xyz/v1/api/getLink',
+			type: 'POST',
+			dataType: "json",
+			data: data,
+			beforeSend: function () {
+				const loading = `<button class="btn btn-primary" type="button" disabled id="processing_button">
+						<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+						Processing...
+					</button>`;
+				$(loading).insertBefore("#submit_button");
+				$("#submit_button").hide();
+
+			},
+			success: function (e) {
+				$("#processing_button").remove();
+				$("#submit_button").show();
+			},
+			error: function (e) {
+				var responseDatas = JSON.parse(e.responseText);
+			}
+		}).done(function (res) {
+			console.log("Sample of data:", res);
+			const status = res.status;
+			const data = res.data;
+			if (status === 0) {
+				$("#result_text").val("Link không hợp lệ / Host không được hỗ trợ.");
+				return;
+			} else if (status === 1) {
+				$("#result").attr("href", data);
+				$("#result").html("Download");
+				$("#result_text").val(data);
+				return;
+			} else {
+				$("#result_text").val("Hệ thống đang xảy ra lỗi, vui lòng quay lại sau.");
+				return;
+			}
+		});
+	});
+
+</script>
+
+</html>
